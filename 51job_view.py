@@ -48,7 +48,7 @@ sheet1.write(0, 10,'发布时间')
 number = 1
 item = input()
 
-for j in range(1,10):   #页数自己随便改
+for j in range(1,100):   #页数自己随便改
     try:
         print("正在爬取第"+str(j)+"页数据...")
         html = getfront(j,item)      #调用获取网页原码

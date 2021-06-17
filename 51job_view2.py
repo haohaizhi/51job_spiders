@@ -55,12 +55,15 @@ for i in range(0,len(li3)):
 
     except:
         pass
-a.to_excel('51job2.xls', sheet_name='Job', index=False)
+a.to_excel('51job2.xlsx', sheet_name='Job', index=False)
 #############################################################################################
 import pandas as pd
 import re
-from pyecharts import Funnel,Pie,Geo
+from pyecharts.charts import Funnel,Pie,Geo
 import matplotlib.pyplot as plt
+from pyecharts import options as opts
+from pyecharts.datasets import register_url
+
 
 file = pd.read_excel(r'51job2.xls',sheet_name='Job')
 f = pd.DataFrame(file)
@@ -117,16 +120,34 @@ dir1 = get_edu(education)
 
 attr= dir1.keys()
 value = dir1.values()
-pie = Pie("学历要求")
-pie.add("", attr, value, center=[50, 50], is_random=False, radius=[30, 75], rosetype='radius',
-        is_legend_show=False, is_label_show=True,legend_orient='vertical')
-pie.render('学历要求玫瑰图.html')
+
+# 旧版pyecharts
+# pie = Pie("学历要求")
+# pie.add("", attr, value, center=[50, 50], is_random=False, radius=[30, 75], rosetype='radius',
+#         is_legend_show=False, is_label_show=True,legend_orient='vertical')
+# pie.render('学历要求玫瑰图.html')
+
+# 新版pyecharts
+c = (
+    Pie()
+    .add(
+        "",
+        [list(z) for z in zip(attr, value)],
+        radius=["40%", "75%"],
+    )
+    .set_global_opts(
+        title_opts=opts.TitleOpts(title="Pie-Radius"),
+        legend_opts=opts.LegendOpts(orient="vertical", pos_top="15%", pos_left="2%"),
+    )
+    .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
+    .render("学历要求玫瑰图.html")
+)
 
 def get_address(list):
     address2 = {}
     for i in set(list):
         address2[i] = list.count(i)
-    #address2.pop('异地招聘')
+    address2.pop('异地招聘')
     # 有些地名可能不合法或者地图包里没有可以自行删除，之前以下名称都会报错，现在好像更新了
     #address2.pop('山东')
     #address2.pop('怒江')
@@ -134,13 +155,27 @@ def get_address(list):
     return address2
 dir2 = get_address(address)
 #print(dir2)
-
-geo = Geo("大数据人才需求分布图", title_color="#2E2E2E",
-          title_text_size=24,title_top=20,title_pos="center", width=1300,height=600)
 attr2 = dir2.keys()
 value2 = dir2.values()
-geo.add("",attr2, value2, type="effectScatter", is_random=True, visual_range=[0, 1000], maptype='china',symbol_size=8, effect_scale=5, is_visualmap=True)
-geo.render('大数据城市需求分布图.html')
+
+# 旧版pyecharts
+# geo = Geo("大数据人才需求分布图", title_color="#2E2E2E",
+#           title_text_size=24,title_top=20,title_pos="center", width=1300,height=600)
+
+# geo.add("",attr2, value2, type="effectScatter", is_random=True, visual_range=[0, 1000], maptype='china',symbol_size=8, effect_scale=5, is_visualmap=True)
+# geo.render('大数据城市需求分布图.html')
+
+# 新版pyecharts
+c = (
+    Geo()
+    .add_schema(maptype="china")
+    .add("geo", [list(z) for z in zip(attr2, value2)])
+    .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+    .set_global_opts(
+        visualmap_opts=opts.VisualMapOpts(), title_opts=opts.TitleOpts(title="Geo-基本示例")
+    )
+    .render("大数据城市需求分布图.html")
+)
 
 def get_experience(list):
     experience2 = {}
@@ -152,8 +187,20 @@ dir3 = get_experience(experience)
 
 attr3= dir3.keys()
 value3 = dir3.values()
-funnel = Funnel("工作经验漏斗图",title_pos='center')
-funnel.add("", attr3, value3,is_label_show=True,label_pos="inside", label_text_color="#fff",legend_orient='vertical',legend_pos='left')
-funnel.render('工作经验要求漏斗图.html')
 
+# 旧版pyecharts
+# funnel = Funnel("工作经验漏斗图",title_pos='center')
+# funnel.add("", attr3, value3,is_label_show=True,label_pos="inside", label_text_color="#fff",legend_orient='vertical',legend_pos='left')
+# funnel.render('工作经验要求漏斗图.html')
 
+# 新版pyecharts
+c = (
+    Funnel()
+    .add(
+        "",
+        [list(z) for z in zip(attr3, value3)],
+        label_opts=opts.LabelOpts(position="inside"),
+    )
+    .set_global_opts(title_opts=opts.TitleOpts(title="Funnel-Label（inside)"))
+    .render("工作经验要求漏斗图.html")
+)
