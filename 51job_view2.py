@@ -2,12 +2,14 @@
 import pandas as pd
 import re
 
+#读取表格内容到data
 data = pd.read_excel(r'51job.xls',sheet_name='Job')
 result = pd.DataFrame(data)
 
 a = result.dropna(axis=0,how='any')
 pd.set_option('display.max_rows',None)     #输出全部行，不省略
 
+#清洗职位中的异常数据
 b = u'数据'
 number = 1
 li = a['职位']
@@ -20,7 +22,7 @@ for i in range(0,len(li)):
             a = a.drop(i,axis=0)  #删除整行
     except:
         pass
-
+#清洗学历要求的异常数据
 b2 = '人'
 li2 = a['学历要求']
 for i in range(0,len(li2)):
@@ -32,6 +34,7 @@ for i in range(0,len(li2)):
     except:
         pass
 
+#转换薪资单位
 b3 =u'万/年'
 b4 =u'千/月'
 li3 = a['薪资']
@@ -55,8 +58,11 @@ for i in range(0,len(li3)):
 
     except:
         pass
+
+#保存成另一个excel文件
 a.to_excel('51job2.xlsx', sheet_name='Job', index=False)
-#############################################################################################
+
+########################################数据可视化################################################
 import pandas as pd
 import re
 from pyecharts.charts import Funnel,Pie,Geo
@@ -77,6 +83,8 @@ address =[]
 salary = []
 education = []
 experience = []
+
+
 for i in range(0,len(f)):
     try:
         a = add[i].split('-')
@@ -99,6 +107,7 @@ max_s=[]							#定义存放最高薪资的列表
 for i in range(0,len(experience)):
     min_s.append(salary[i][0])
     max_s.append(salary[i][0])
+
 #matplotlib模块如果显示不了中文字符串可以用以下代码。
 plt.rcParams['font.sans-serif'] = ['KaiTi'] # 指定默认字体
 plt.rcParams['axes.unicode_minus'] = False # 解决保存图像是负号'-'显示为方块的问题
@@ -147,11 +156,14 @@ def get_address(list):
     address2 = {}
     for i in set(list):
         address2[i] = list.count(i)
-    address2.pop('异地招聘')
-    # 有些地名可能不合法或者地图包里没有可以自行删除，之前以下名称都会报错，现在好像更新了
-    #address2.pop('山东')
-    #address2.pop('怒江')
-    #address2.pop('池州')
+    try:
+        address2.pop('异地招聘')
+        # 有些地名可能不合法或者地图包里没有可以自行删除，之前以下名称都会报错，现在好像更新了
+        # address2.pop('山东')
+        # address2.pop('怒江')
+        # address2.pop('池州')
+    except:
+        pass
     return address2
 dir2 = get_address(address)
 #print(dir2)
