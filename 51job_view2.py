@@ -71,7 +71,7 @@ from pyecharts import options as opts
 from pyecharts.datasets import register_url
 
 
-file = pd.read_excel(r'51job2.xls',sheet_name='Job')
+file = pd.read_excel(r'51job2.xlsx',sheet_name='Job')
 f = pd.DataFrame(file)
 pd.set_option('display.max_rows',None)
 
