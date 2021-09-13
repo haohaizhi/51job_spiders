@@ -23,7 +23,7 @@ def getfront(page,item):       #page是页数，item是输入的字符串
      return html
 
 def getInformation(html):
-    reg = re.compile(r'"type":"engine_search_result".*?"job_href":"(.*?)","job_name":"(.*?)".*?"company_href":"(.*?)","company_name":"(.*?)","providesalary_text":"(.*?)".*?"updatedate":"(.*?)".*?,'
+    reg = re.compile(r'"type":"engine_jds".*?"job_href":"(.*?)","job_name":"(.*?)".*?"company_href":"(.*?)","company_name":"(.*?)","providesalary_text":"(.*?)".*?"updatedate":"(.*?)".*?,'
                      r'"companytype_text":"(.*?)".*?"jobwelf":"(.*?)".*?"attribute_text":"(.*?)","(.*?)","(.*?)","(.*?)","companysize_text":"(.*?)","companyind_text":"(.*?)"',re.S)#匹配换行符
     items=re.findall(reg,html)
     print(items)
