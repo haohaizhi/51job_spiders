@@ -47,7 +47,7 @@ def main():
     sheet1.write(0, 9,'公司福利')
     sheet1.write(0, 10,'发布时间')
     number = 1
-    item = input()     #输入想搜索的职位关键字
+    item = input("请输入需要搜索的职位：")     #输入想搜索的职位关键字
 
     for j in range(1,2):   #页数自己随便改
         try:
