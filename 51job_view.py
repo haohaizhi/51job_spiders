@@ -1,85 +1,146 @@
-# -*- coding:utf-8 -*-
-import urllib.request
-import xlwt
-import re
-import urllib.parse
-import time
-header={
-    'Host':'search.51job.com',
-    'Upgrade-Insecure-Requests':'1',
-    'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
-}
-def getfront(page,item):       #page是页数，item是输入的字符串
-     result = urllib.parse.quote(item)					#先把字符串转成十六进制编码
-     ur1 = result+',2,'+ str(page)+'.html'
-     ur2 = 'https://search.51job.com/list/000000,000000,0000,00,9,99,'
-     res = ur2+ur1    #拼接网址
-     a = urllib.request.urlopen(res)
-     html = a.read().decode('gbk')      # 读取源代码并转为unicode
-     html = html.replace('\\','')       # 将用于转义的"\"替换为空
-     html = html.replace('[', '')
-     html = html.replace(']', '')
-     #print(html)
-     return html
+import pandas as pd
+import matplotlib.pyplot as plt
 
-def getInformation(html):
-    reg = re.compile(r'"type":"engine_jds".*?"job_href":"(.*?)","job_name":"(.*?)".*?"company_href":"(.*?)","company_name":"(.*?)","providesalary_text":"(.*?)".*?"updatedate":"(.*?)".*?,'
-                     r'"companytype_text":"(.*?)".*?"jobwelf":"(.*?)".*?"attribute_text":"(.*?)","(.*?)","(.*?)","(.*?)","companysize_text":"(.*?)","companyind_text":"(.*?)"',re.S)#匹配换行符
-    items=re.findall(reg,html)
-    print(items)
-    return items
+from pyecharts.charts import Pie,Funnel,Geo
+from pyecharts import options as opts
 
-def main():
-    #新建表格空间
-    excel1 = xlwt.Workbook()
-    # 设置单元格格式
-    sheet1 = excel1.add_sheet('Job', cell_overwrite_ok=True)
-    sheet1.write(0, 0, '序号')
-    sheet1.write(0, 1, '职位')
-    sheet1.write(0, 2, '公司名称')
-    sheet1.write(0, 3, '公司地点')
-    sheet1.write(0, 4, '公司性质')
-    sheet1.write(0, 5, '薪资')
-    sheet1.write(0, 6, '学历要求')
-    sheet1.write(0, 7, '工作经验')
-    sheet1.write(0, 8, '公司规模')
-    #sheet1.write(0, 9, '公司类型')
-    sheet1.write(0, 9,'公司福利')
-    sheet1.write(0, 10,'发布时间')
-    number = 1
-    item = input("请输入需要搜索的职位：")     #输入想搜索的职位关键字
+file = pd.read_excel(r'51job2.xls',sheet_name='Job')
 
-    for j in range(1,2):   #页数自己随便改
-        try:
-            print("正在爬取第"+str(j)+"页数据...")
-            html = getfront(j,item)      #调用获取网页原码
-            for i in getInformation(html):
-                try:
-                    #url1 = i[1]          #职位网址
-                    #res1 = urllib.request.urlopen(url1).read().decode('gbk')
-                    #company = re.findall(re.compile(r'<div class="com_tag">.*?<p class="at" title="(.*?)"><span class="i_flag">.*?<p class="at" title="(.*?)">.*?<p class="at" title="(.*?)">.*?',re.S),res1)
-                    #job_need = re.findall(re.compile(r'<p class="msg ltype".*?>.*?&nbsp;&nbsp;<span>|</span>&nbsp;&nbsp;(.*?)&nbsp;&nbsp;<span>|</span>&nbsp;&nbsp;(.*?)&nbsp;&nbsp;<span>|</span>&nbsp;&nbsp;.*?</p>',re.S),res1)
-                    #welfare = re.findall(re.compile(r'<span class="sp4">(.*?)</span>',re.S),res1)
-                    #print(i[0],i[2],i[4],i[5],company[0][0],job_need[2][0],job_need[1][0],company[0][1],company[0][2],welfare,i[6])
-                    sheet1.write(number,0,number)
-                    sheet1.write(number,1,i[1])
-                    sheet1.write(number,2,i[3])
-                    sheet1.write(number,3,i[8])
-                    sheet1.write(number,4,i[6])
-                    sheet1.write(number,5,i[4])
-                    sheet1.write(number,6,i[10])
-                    sheet1.write(number,7,i[9])
-                    sheet1.write(number,8,i[12])
-                    #sheet1.write(number,9,i[7])
-                    sheet1.write(number,9,i[7])
-                    sheet1.write(number,10,i[5])
-                    number+=1
-                    excel1.save("51job.xls")
-                    time.sleep(0.3) #休息间隔，避免爬取海量数据时被误判为攻击，IP遭到封禁
-                except:
-                    pass
-        except:
-            pass
+pd.set_option('display.max_rows', None)  # 输出全部行，不省略
+pd.set_option('display.max_columns', None)  # 输出全部列，不省略
 
-if __name__ == '__main__':
-    main()
+f = pd.DataFrame(file)
+
+add = f['公司地点']
+sly = f['薪资']
+edu = f['学历要求']
+exp = f['工作经验']
+
+address =[]             # 存放公司地点
+salary = []             # 存放薪资
+education = []          # 存放学历要求
+experience = []         # 存放工作经验
+
+for i in range(0,len(f)):
+    try:
+        address.append(add[i])
+        salary.append(sly[i])
+        education.append(edu[i])
+        experience.append(exp[i])
+        # print(add[i],sly[i],edu[i],exp[i])
+    except:
+       pass
+
+#matplotlib模块如果显示不了中文字符串可以用以下代码。
+
+plt.rcParams['font.sans-serif'] = ['KaiTi'] # 指定默认字体
+plt.rcParams['axes.unicode_minus'] = False # 解决保存图像是负号'-'显示为方块的问题
+
+my_df = pd.DataFrame({'experience':experience, 'salary': salary})				#关联工作经验与薪资
+data1 = my_df.groupby('experience').mean()['salary'].plot(kind='line')
+plt.show()
+
+my_df2 = pd.DataFrame({'education':education, 'salary': salary})				#关联学历与薪资
+data2 = my_df2.groupby('education').mean()['salary'].plot(kind='line')
+plt.show()
+
+### 动态图
+
+def get_edu(list):       # 储存 不同学历要求及其数量
+    education_dir = {}
+    for i in set(list):
+        education_dir[i] = list.count(i)
+    return education_dir
+
+education_dir = get_edu(education)
+
+attr= education_dir.keys()
+value = education_dir.values()
+
+# 旧版pyecharts 0.5.9
+# pie = Pie("学历要求")
+# pie.add("", attr, value, center=[50, 50], is_random=False, radius=[30, 75], rosetype='radius',
+#         is_legend_show=False, is_label_show=True,legend_orient='vertical')
+# pie.render('学历要求动态饼图.html')
+
+# 新版pyecharts
+c = (
+    Pie()
+    .add(
+        "",
+        [list(z) for z in zip(attr, value)],
+        radius=["40%", "75%"],
+    )
+    .set_global_opts(
+        title_opts=opts.TitleOpts(title="Pie-Radius"),
+        legend_opts=opts.LegendOpts(orient="vertical", pos_top="15%", pos_left="2%"),
+    )
+    .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
+    .render("学历要求动态饼图.html")
+)
+
+def get_experience(list):           # 储存 工作经验要求及其数量
+    experience_dir = {}
+    for i in set(list):
+         experience_dir[i] = list.count(i)
+    return experience_dir
+experience_dir = get_experience(experience)
+
+
+attr2 = experience_dir.keys()
+value2 = experience_dir.values()
+
+# 旧版pyecharts 0.5.9
+# funnel = Funnel("工作经验漏斗图",title_pos='center')
+# funnel.add("", attr3, value3,is_label_show=True,label_pos="inside", label_text_color="#fff",legend_orient='vertical',legend_pos='left')
+# funnel.render('工作经验要求漏斗图.html')
+
+# 新版pyecharts
+c = (
+    Funnel()
+    .add(
+        "",
+        [list(z) for z in zip(attr2, value2)],
+        label_opts=opts.LabelOpts(position="inside"),
+    )
+    .set_global_opts(title_opts=opts.TitleOpts(title="Funnel-Label（inside)"))
+    .render("工作经验要求漏斗图.html")
+)
+
+def get_address(list):          # 储存 城市名及其数量
+    address_dir = {}
+    for i in set(list):
+        address_dir[i] = list.count(i)
+    try:
+        address_dir.pop('异地招聘')
+        # 有些地名可能不合法或者地图包里没有可以自行删除，之前以下名称都会报错，现在好像更新了没报错了
+        # address_dir.pop('山东')
+        # address_dir.pop('怒江')
+        # address_dir.pop('池州')
+    except:
+        pass
+    return address_dir
+
+address_dir = get_address(address)
+
+attr3 = address_dir.keys()
+value3 = address_dir.values()
+
+# 旧版pyecharts 0.5.9
+# geo = Geo("大数据人才需求分布图", title_color="#2E2E2E",
+#           title_text_size=24,title_top=20,title_pos="center", width=1300,height=600)
+
+# geo.add("",attr2, value2, type="effectScatter", is_random=True, visual_range=[0, 1000], maptype='china',symbol_size=8, effect_scale=5, is_visualmap=True)
+# geo.render('大数据城市需求分布图.html')
+
+# 新版pyecharts
+c = (
+    Geo()
+    .add_schema(maptype="china")
+    .add("geo", [list(z) for z in zip(attr3, value3)])
+    .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+    .set_global_opts(
+        visualmap_opts=opts.VisualMapOpts(), title_opts=opts.TitleOpts(title="Geo-基本示例")
+    )
+    .render("大数据城市需求分布图.html")
+)
